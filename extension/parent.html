@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Krypton — Parent Board</title>
+  <link rel="icon" href="icons/icon32.png">
+  <link rel="stylesheet" href="theme.css">
+  <script src="theme-init.js"></script>
+  <link rel="stylesheet" href="app.css">
+  <link rel="stylesheet" href="fx3d.css">
+  <style>
+    .gate { min-height: 100vh; display: grid; place-items: center; padding: 16px; }
+    .gate .card { width: min(440px, 100%); padding: 28px; }
+    .gate h1 { margin: 18px 0 4px; font-size: 26px; }
+    .gate .field { margin-top: 12px; }
+    .gate button { width: 100%; margin-top: 16px; padding: 12px; }
+    .link { background: none; color: var(--accent); padding: 8px 0 0; font-weight: 500; width: auto !important; }
+    .pmain { max-width: 1100px; margin: 0 auto; padding: 24px 20px 60px; }
+    .ptop { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .tabs2 { display: flex; gap: 6px; margin: 18px 0; flex-wrap: wrap; }
+    .tabs2 button { background: rgba(var(--hi),calc(.05*var(--hk))); border: 1px solid var(--line); color: var(--muted); }
+    .tabs2 button.active { background: var(--grad); color: var(--ink); }
+    .ppanel { display: none; } .ppanel.active { display: block; }
+    table { width: 100%; border-collapse: collapse; } td, th { padding: 9px 10px; border-bottom: 1px solid var(--line); text-align: left; }
+    th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+    .msg { margin-top: 10px; font-size: 13px; min-height: 18px; }
+    .msg.bad { color: var(--bad); } .msg.good { color: var(--accent); }
+    .rulegrid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 800px) { .rulegrid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <!-- first-time setup -->
+  <section class="gate" id="setup" hidden>
+    <form class="card" id="setupForm">
+      <div class="brand"><div class="gem"></div>KRYPTON · PARENTS</div>
+      <h1>Create the parent account</h1>
+      <p class="muted">Your Groq API key is your parent login. Krypton uses it for AI, and you can use it to reset a forgotten password. Get a free key at <b>console.groq.com</b> → API Keys.</p>
+      <div class="field"><label>Groq API key</label><input type="password" id="sKey" placeholder="gsk_…" required autocomplete="off"></div>
+      <div class="field"><label>Lock password (children shouldn't know it)</label><input type="password" id="sPw" required minlength="4" autocomplete="new-password"></div>
+      <div class="field"><label>Confirm password</label><input type="password" id="sPw2" required minlength="4" autocomplete="new-password"></div>
+      <button class="btn-primary">Create &amp; continue</button>
+      <div class="msg" id="setupMsg"></div>
+    </form>
+  </section>
+
+  <!-- login -->
+  <section class="gate" id="login" hidden>
+    <form class="card" id="loginForm">
+      <div class="brand"><div class="gem"></div>KRYPTON · PARENTS</div>
+      <h1>Parent login</h1>
+      <p class="muted">Enter the parent password to see progress and change the lock rules.</p>
+      <div class="field"><label>Password</label><input type="password" id="lPw" required autocomplete="current-password"></div>
+      <button class="btn-primary">Log in</button>
+      <button type="button" class="link" id="forgot">Forgot password? Reset with the Groq key</button>
+      <div id="resetBox" hidden>
+        <div class="field"><label>Groq API key used at setup</label><input type="password" id="rKey" autocomplete="off"></div>
+        <div class="field"><label>New password</label><input type="password" id="rPw" minlength="4" autocomplete="new-password"></div>
+        <button type="button" class="btn-ghost" id="resetBtn">Reset password</button>
+      </div>
+      <div class="msg" id="loginMsg"></div>
+    </form>
+  </section>
+
+  <!-- dashboard -->
+  <div class="pmain" id="board" hidden>
+    <div class="ptop">
+      <div class="brand big"><div class="gem"></div>PARENT BOARD</div>
+      <div class="row"><div data-theme-picker style="width:170px"></div><span class="pill" id="who"></span><button class="btn-ghost" id="logout">Log out</button></div>
+    </div>
+    <div class="tabs2" id="ptabs">
+      <button data-p="overview" class="active">📈 Overview</button>
+      <button data-p="rules">🔒 Lock rules</button>
+      <button data-p="marks">📊 Marks</button>
+      <button data-p="school">🏫 School</button>
+      <button data-p="account">🔑 Account</button>
+    </div>
+
+    <section class="ppanel active" id="p-overview">
+      <div id="pRemind"></div>
+      <div class="kpis" id="pk" style="grid-template-columns:repeat(4,1fr)"></div>
+      <div class="grid2" style="margin-top:16px">
+        <div class="card"><h3>Last 7 days</h3><div class="week" id="pweek"></div>
+          <p class="muted small-note">🟩 studied &nbsp; 🟥 distracting sites</p></div>
+        <div class="card"><h3>Today's top sites</h3><div class="bars" id="psites"></div></div>
+      </div>
+      <div class="card" style="margin-top:16px"><h3>Recent quizzes</h3><div id="pquiz" class="muted"></div></div>
+    </section>
+
+    <section class="ppanel" id="p-rules">
+      <form class="card" id="rulesForm">
+        <h3>Lockdown rules</h3>
+        <p class="muted">When the scrolling time runs out, distracting sites lock for the time you choose. Only you can change these.</p>
+        <label class="switch"><input type="checkbox" id="rOn"> <span>Focus lock is on</span></label>
+        <div class="rulegrid">
+          <div class="field"><label>Scrolling allowed before the lock (minutes)</label><input type="number" id="rLimit" min="1" max="600"></div>
+          <div class="field"><label>Lock lasts (minutes)</label><input type="number" id="rLock" min="1" max="1440"></div>
+          <div class="field"><label>Early unlock with a study quiz</label>
+            <select id="rQuiz"><option value="1">Allowed</option><option value="0">Not allowed — wait for the timer</option></select></div>
+          <div class="field"><label>Correct answers needed (of 3)</label>
+            <select id="rPass"><option>1</option><option>2</option><option>3</option></select></div>
+        </div>
+        <div class="field"><label>Distracting sites (one per line)</label><textarea id="rSites" rows="8"></textarea></div>
+        <div class="row"><button class="btn-primary">Save rules</button></div>
+        <div class="msg" id="rulesMsg"></div>
+      </form>
+    </section>
+
+    <section class="ppanel" id="p-marks">
+      <div class="card"><h3 id="mStudent">Exam marks</h3><div id="mTable"></div></div>
+    </section>
+
+    <section class="ppanel" id="p-school">
+      <div class="grid2">
+        <div class="card"><h3>📅 School events</h3><div id="pEvents"></div></div>
+        <div class="card"><h3>📝 Behaviour reports</h3><div id="pReports"></div></div>
+      </div>
+    </section>
+
+    <section class="ppanel" id="p-account">
+      <div class="grid2">
+        <form class="card" id="pwForm"><h3>Change password</h3>
+          <div class="field"><label>New password</label><input type="password" id="nPw" minlength="4" required autocomplete="new-password"></div>
+          <button class="btn-primary">Change password</button><div class="msg" id="pwMsg"></div></form>
+        <form class="card" id="keyForm"><h3>Groq API key</h3>
+          <p class="muted" id="keyHint"></p>
+          <div class="field"><label>New Groq key</label><input type="password" id="nKey" required autocomplete="off" placeholder="gsk_…"></div>
+          <button class="btn-primary">Update key</button><div class="msg" id="keyMsg"></div></form>
+      </div>
+      <div class="card" style="margin-top:16px"><h3>🌍 Web accounts (public link)</h3>
+        <p class="muted" id="pubUrl"></p><div id="webUsers"></div></div>
+    </section>
+  </div>
+  <script src="shared.js"></script>
+  <script src="parent.js"></script>
+  <script src="fx3d.js"></script>
+</body>
+</html>

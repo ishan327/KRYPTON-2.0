@@ -1,0 +1,3 @@
+data/*.json
+data/users/
+__pycache__/

@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Krypton — School Admin</title>
+  <link rel="icon" href="icons/icon32.png">
+  <link rel="stylesheet" href="theme.css">
+  <script src="theme-init.js"></script>
+  <link rel="stylesheet" href="app.css">
+  <link rel="stylesheet" href="fx3d.css">
+  <script>if (location.protocol.startsWith("http")) window.KRYPTON_API = location.origin;</script>
+  <style>
+    .gate { min-height: 100vh; display: grid; place-items: center; padding: 16px; }
+    .gate .card { width: min(460px, 100%); padding: 28px; }
+    .gate h1 { margin: 16px 0 4px; font-size: 26px; }
+    .gate .field { margin-top: 12px; }
+    .gate button.btn-primary { width: 100%; margin-top: 16px; padding: 12px; }
+    .smain { max-width: 1150px; margin: 0 auto; padding: 24px 20px 60px; }
+    .stop { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .tabs2 { display: flex; gap: 6px; margin: 18px 0; flex-wrap: wrap; }
+    .tabs2 button { background: rgba(var(--hi),calc(.05*var(--hk))); border: 1px solid var(--line); color: var(--muted); }
+    .tabs2 button.active { background: var(--grad); color: var(--ink); }
+    .sp { display: none; } .sp.active { display: block; }
+    .msg { margin-top: 10px; font-size: 13px; min-height: 18px; } .msg.bad { color: var(--bad); } .msg.good { color: var(--accent); }
+    .item { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+    .item:last-child { border: 0; }
+    .tag { font-size: 12px; padding: 2px 9px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); }
+    .g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+    @media (max-width: 800px) { .g3 { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <section class="gate" id="setup" hidden>
+    <form class="card" id="setupForm">
+      <div class="brand"><div class="gem"></div>KRYPTON · SCHOOL</div>
+      <h1>Set up the school admin</h1>
+      <p class="muted">Staff use this login to send event reminders and behaviour reports to parents. Can only be set up on the Krypton laptop.</p>
+      <div class="field"><label>School name</label><input id="sName" required></div>
+      <div class="field"><label>Your name / role</label><input id="sAdmin" placeholder="e.g. Mrs Sharma, Class Teacher"></div>
+      <div class="field"><label>Admin password</label><input type="password" id="sPw" required minlength="6" autocomplete="new-password"></div>
+      <button class="btn-primary">Create school admin</button>
+      <div class="msg" id="setupMsg"></div>
+    </form>
+  </section>
+
+  <section class="gate" id="login" hidden>
+    <form class="card" id="loginForm">
+      <div class="brand"><div class="gem"></div>KRYPTON · SCHOOL</div>
+      <h1 id="loginTitle">School admin login</h1>
+      <p class="muted">Post events and reminders, and report on students' behaviour to their parents.</p>
+      <div class="field"><label>Admin password</label><input type="password" id="lPw" required autocomplete="current-password"></div>
+      <button class="btn-primary">Log in</button>
+      <div class="msg" id="loginMsg"></div>
+    </form>
+  </section>
+
+  <div class="smain" id="board" hidden>
+    <div class="stop">
+      <div class="brand big"><div class="gem"></div><span id="schoolName">SCHOOL ADMIN</span></div>
+      <div class="row"><div data-theme-picker style="width:170px"></div><button class="btn-ghost" id="logout">Log out</button></div>
+    </div>
+    <div class="tabs2" id="stabs">
+      <button data-s="events" class="active">📅 Events &amp; reminders</button>
+      <button data-s="reports">📝 Behaviour reports</button>
+      <button data-s="students">👥 Students</button>
+    </div>
+
+    <section class="sp active" id="s-events">
+      <div class="grid2">
+        <form class="card" id="evForm"><h3>New event</h3>
+          <div class="field"><label>Title</label><input id="evTitle" placeholder="e.g. Parent-teacher meeting, Science exhibition, Unit test" required></div>
+          <div class="g3">
+            <div class="field"><label>Date</label><input type="date" id="evDate" required></div>
+            <div class="field"><label>Time</label><input type="time" id="evTime"></div>
+            <div class="field"><label>Remind parents</label><select id="evRemind"><option value="1">1 day before</option><option value="2" selected>2 days before</option><option value="3">3 days before</option><option value="7">1 week before</option></select></div>
+          </div>
+          <div class="field"><label>For</label><select id="evAud"><option value="all">Everyone</option>
+            <option value="1">Class 1</option><option value="2">Class 2</option><option value="3">Class 3</option><option value="4">Class 4</option><option value="5">Class 5</option>
+            <option value="6">Class 6</option><option value="7">Class 7</option><option value="8">Class 8</option><option value="9">Class 9</option><option value="10">Class 10</option></select></div>
+          <div class="field"><label>Details for parents</label><textarea id="evDesc" rows="3" placeholder="What to bring, where, dress code…"></textarea></div>
+          <button class="btn-primary">Post event</button><div class="msg" id="evMsg"></div></form>
+        <div class="card"><h3>Upcoming events</h3><div id="evList"></div></div>
+      </div>
+    </section>
+
+    <section class="sp" id="s-reports">
+      <div class="grid2">
+        <form class="card" id="rpForm"><h3>New behaviour report</h3>
+          <div class="field"><label>Student</label><select id="rpStudent" required></select></div>
+          <div class="g3">
+            <div class="field"><label>Type</label><select id="rpCat"></select></div>
+            <div class="field"><label>Area</label><select id="rpArea"></select></div>
+            <div class="field"><label>Date</label><input type="date" id="rpDate"></div>
+          </div>
+          <div class="field"><label>What happened (parents will read this)</label><textarea id="rpNote" rows="4" required></textarea></div>
+          <button class="btn-primary">Send to parents</button><div class="msg" id="rpMsg"></div></form>
+        <div class="card"><h3>Recent reports</h3><div id="rpList"></div></div>
+      </div>
+    </section>
+
+    <section class="sp" id="s-students">
+      <div class="card"><h3>Students on Krypton</h3><div id="stList"></div></div>
+    </section>
+  </div>
+  <script src="shared.js"></script>
+  <script src="school.js"></script>
+  <script src="fx3d.js"></script>
+</body>
+</html>

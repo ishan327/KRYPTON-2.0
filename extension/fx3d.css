@@ -1,0 +1,32 @@
+/* Krypton 3D: cards tilt toward the mouse with a moving shine, buttons press in, headings get depth.
+   Everything here is scoped to html.fx3d, so removing that class (the 🧊 switch) returns the flat look. */
+html.fx3d main { perspective: 1400px; }
+html.fx3d .tilt {
+  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateZ(0);
+  transform-style: preserve-3d;
+  transition: transform .18s ease-out, box-shadow .25s ease-out;
+  will-change: transform;
+}
+html.fx3d .tilt:not(.flip) { position: relative; }
+html.fx3d .tilt.lift {
+  box-shadow: 0 18px 40px rgba(var(--shade), calc(.45 * var(--sk))), 0 0 0 1px rgba(var(--a), .12), 0 0 30px rgba(var(--a), .08);
+}
+html.fx3d .tilt::after {          /* moving shine that follows the mouse */
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(var(--hi), calc(.09 * var(--hk))), transparent 45%);
+  opacity: 0; transition: opacity .25s;
+}
+html.fx3d .tilt.lift::after { opacity: 1; }
+/* buttons: a raised edge that presses down */
+html.fx3d .btn-primary { box-shadow: 0 4px 0 rgba(var(--shade), calc(.55 * var(--sk))), 0 8px 22px rgba(var(--a), .28); transform: translateY(-1px); }
+html.fx3d .btn-primary:active { box-shadow: 0 1px 0 rgba(var(--shade), calc(.55 * var(--sk))), 0 3px 10px rgba(var(--a), .2); transform: translateY(2px); }
+html.fx3d .btn-ghost:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(var(--shade), calc(.3 * var(--sk))); }
+/* headings with layered depth */
+html.fx3d .hero h1 { text-shadow: 0 1px 0 rgba(var(--a), .25), 0 2px 0 rgba(var(--a), .18), 0 3px 0 rgba(var(--a), .12), 0 10px 24px rgba(var(--shade), calc(.5 * var(--sk))); }
+html.fx3d nav button.active { transform: translateX(3px); box-shadow: inset 3px 0 0 var(--accent), 0 6px 18px rgba(var(--a), .12); }
+/* the spinning crystal logo */
+.crystal3d { display: inline-block; flex: none; filter: drop-shadow(0 0 12px rgba(var(--a), .55)); }
+.fx3d-toggle { width: 100%; padding: 7px 10px; font-size: 13px; }
+@media (prefers-reduced-motion: reduce) {
+  html.fx3d .tilt { transform: none !important; transition: none; }
+}

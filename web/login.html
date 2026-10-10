@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Krypton — Sign in</title>
+  <link rel="icon" href="/ext/icons/icon32.png">
+  <link rel="stylesheet" href="/ext/theme.css">
+  <script src="/ext/theme-init.js"></script>
+  <link rel="stylesheet" href="/ext/fx3d.css">
+  <style>
+    body { min-height: 100vh; display: grid; place-items: center; padding: 16px; }
+    .card { width: min(420px, 100%); padding: 28px; }
+    h1 { margin: 16px 0 4px; font-size: 26px; }
+    .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; background: rgba(var(--shade),calc(.35*var(--sk))); border-radius: 12px; margin: 18px 0 6px; }
+    .tabs button { background: transparent; color: var(--muted); }
+    .tabs button.active { background: var(--grad); color: var(--ink); }
+    .field { display: grid; gap: 5px; margin-top: 12px; }
+    .field label { font-size: 12px; color: var(--muted); }
+    form > button { width: 100%; margin-top: 18px; padding: 12px; }
+    .msg { margin-top: 12px; min-height: 20px; font-size: 13px; color: var(--bad); }
+    .slots { margin-top: 10px; font-size: 12.5px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand"><div class="gem"></div>KRYPTON</div>
+    <h1 id="title">Welcome back</h1>
+    <p class="muted">Your NCERT study buddy — Classes 1 to 10.</p>
+    <div data-theme-picker style="max-width:200px"></div>
+    <div class="tabs"><button id="tIn" class="active">Log in</button><button id="tUp">Create account</button></div>
+    <div class="muted slots" id="slots"></div>
+    <form id="form">
+      <div class="field" id="fName" hidden><label>Your name</label><input id="name" maxlength="40" autocomplete="name"></div>
+      <div class="field" id="fCls" hidden><label>Class</label>
+        <select id="cls"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option>
+          <option>7</option><option>8</option><option>9</option><option selected>10</option></select></div>
+      <div class="field"><label>Username</label><input id="username" required autocomplete="username" autocapitalize="off"></div>
+      <div class="field"><label>Password</label><input id="password" type="password" required autocomplete="current-password"></div>
+      <button class="btn-primary" id="go">Log in</button>
+      <div class="msg" id="msg"></div>
+    </form>
+  </div>
+<script>
+  const $ = id => document.getElementById(id);
+  let mode = "login";
+  if (localStorage.getItem("krypton.token")) location.replace("/");
+  function setMode(m) {
+    mode = m;
+    $("tIn").classList.toggle("active", m === "login"); $("tUp").classList.toggle("active", m === "signup");
+    $("fName").hidden = $("fCls").hidden = m === "login";
+    $("title").textContent = m === "login" ? "Welcome back" : "Join Krypton";
+    $("go").textContent = m === "login" ? "Log in" : "Create account";
+    $("password").autocomplete = m === "login" ? "current-password" : "new-password";
+    $("msg").textContent = "";
+  }
+  $("tIn").onclick = () => setMode("login");
+  $("tUp").onclick = () => setMode("signup");
+  fetch("/api/auth/slots").then(r => r.json()).then(s => {
+    $("slots").textContent = `${s.used} of ${s.max} accounts used` + (s.used >= s.max ? " — new sign-ups are closed." : "");
+  }).catch(() => {});
+  $("form").onsubmit = async e => {
+    e.preventDefault();
+    $("go").disabled = true;
+    $("msg").textContent = "";
+    const body = { username: $("username").value, password: $("password").value };
+    if (mode === "signup") Object.assign(body, { name: $("name").value, cls: Number($("cls").value) });
+    try {
+      const r = await fetch(`/api/auth/${mode}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.detail || "Something went wrong");
+      localStorage.setItem("krypton.token", d.token);
+      localStorage.setItem("krypton.user", d.user.username);
+      const k = "krypton.ext." + d.user.username;
+      if (!localStorage.getItem(k)) {  // first time on this device: start them on their own class
+        localStorage.setItem(k, JSON.stringify({ settings: { studyClass: d.user.cls || 10, studySubject: "" } }));
+      }
+      location.replace("/");
+    } catch (err) { $("msg").textContent = err.message; $("go").disabled = false; }
+  };
+</script>
+<script src="/ext/fx3d.js"></script>
+<script src="/ext/intro.js"></script>
+</body>
+</html>

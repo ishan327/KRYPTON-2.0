@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Krypton — NCERT Study Buddy</title>
+  <link rel="icon" href="icons/icon32.png">
+  <link rel="stylesheet" href="theme.css">
+  <script src="theme-init.js"></script>
+  <link rel="stylesheet" href="app.css">
+  <link rel="stylesheet" href="fx3d.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="side">
+    <div class="brand big"><div class="gem"></div>KRYPTON</div>
+    <div class="tag muted">NCERT study buddy · Classes 1–10</div>
+    <div class="gamebox" id="gamebox" title="Open Progress">
+      <div class="gtop"><span id="gStreak">🔥 0</span><span id="gLevel">Lv 1 · Rookie</span></div>
+      <div class="gbar"><div id="gBar"></div></div>
+      <div class="gsub"><span id="gXp">0 XP</span><span id="gToday">0/100 today</span></div>
+    </div>
+    <nav id="nav">
+      <button data-tab="agent"><span>🤖</span>AI Agent</button>
+      <button data-tab="revise"><span>🎯</span>Revise <b class="badge" id="dueBadge" hidden></b></button>
+      <button data-tab="snap"><span>📸</span>Snap &amp; Solve</button>
+      <button data-tab="viva"><span>🎙️</span>Viva</button>
+      <button data-tab="langlab"><span>🗣️</span>Language Lab</button>
+      <button data-tab="progress"><span>🏆</span>Progress</button>
+      <button data-tab="explain" class="active"><span>🧠</span>Explain</button>
+      <button data-tab="mindmap"><span>🗺️</span>Mind Map</button>
+      <button data-tab="flashcards"><span>🃏</span>Flashcards</button>
+      <button data-tab="quiz"><span>❓</span>Quiz</button>
+      <button data-tab="paper"><span>📝</span>Question Paper</button>
+      <button data-tab="guide"><span>🧭</span>Study Guide</button>
+      <button data-tab="school"><span>🏫</span>School <b class="badge" id="schoolBadge" hidden></b></button>
+      <button data-tab="marks"><span>📊</span>My Marks</button>
+      <button data-tab="focus"><span>🔒</span>Focus &amp; Stats</button>
+      <button data-tab="settings"><span>⚙️</span>Settings</button>
+    </nav>
+    <div class="side-foot">
+      <div class="label">Answer language</div>
+      <select id="ansLang" title="Krypton answers in this language"><option value="">Auto (English / Hindi)</option></select>
+      <div class="label">Theme</div>
+      <div data-theme-picker></div>
+      <div class="label">AI mode</div>
+      <div class="seg" id="modes">
+        <button data-mode="groq" title="Groq cloud AI">⚡ Groq</button>
+        <button data-mode="local" title="AI on your GPU">🖥 Local</button>
+        <button data-mode="offline" title="No AI — textbook engine">📘 Off</button>
+      </div>
+      <div class="pill status"><span class="dot" id="dot"></span><span id="conn">connecting…</span></div>
+    </div>
+  </aside>
+
+  <main>
+    <section class="ctx card" id="ctxbar">
+      <div class="field"><label>Class</label><select id="cls"></select></div>
+      <div class="field"><label>Subject</label><select id="subject"></select></div>
+      <div class="field grow"><label>Chapters</label>
+        <div class="chap-picker">
+          <button class="btn-ghost chap-btn" id="chapBtn">All chapters ▾</button>
+          <div class="chap-menu card" id="chapMenu"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- AGENT -->
+    <section class="panel" id="tab-agent">
+      <div class="hero"><h1>Krypton <span class="grad">Agent</span></h1>
+        <p class="muted">Your AI sidekick. It opens tabs, searches the web, reads and edits code in your workspace, looks things up in your NCERT books and knows your marks.</p></div>
+      <div class="card chat">
+        <div class="msgs" id="msgs">
+          <div class="bubble bot">Hi! I'm Krypton Agent 💎 Try one of these:
+            <div class="chips">
+              <button class="chip">Open Wikipedia's page on photosynthesis</button>
+              <button class="chip">Which subject should I revise first based on my marks?</button>
+              <button class="chip">Create hello.py that prints the 5 times table</button>
+              <button class="chip">Explain Ohm's law from my Class 10 book and quiz me</button>
+            </div></div>
+        </div>
+        <form class="ask composer" id="agentForm">
+          <button type="button" class="btn-ghost mic" id="agentMic" title="Speak your instruction (tap again to stop)">🎤</button>
+          <input id="agentInput" placeholder="Ask, or tap 🎤 and say what to do…" autocomplete="off">
+          <button class="btn-primary">Send</button>
+          <button type="button" class="btn-ghost" id="agentVoice" title="Read replies aloud">🔇</button>
+          <button type="button" class="btn-ghost" id="agentClear" title="New chat">↺</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- REVISE -->
+    <section class="panel" id="tab-revise">
+      <div class="hero"><h1>Fix your <span class="grad">weak spots</span></h1>
+        <p class="muted">Every question you get wrong comes back here — tomorrow, then in 3, 7, 14 and 30 days — until you've mastered it.</p></div>
+      <div class="grid2">
+        <div class="card"><h3>Today's revision</h3><div id="revStart"></div>
+          <div class="boxes" id="revBoxes"></div></div>
+        <div class="card"><h3>Weakest chapters</h3><div id="weakList"></div></div>
+      </div>
+      <div class="out" id="revOut"></div>
+    </section>
+
+    <!-- SNAP & SOLVE -->
+    <section class="panel" id="tab-snap">
+      <div class="hero"><h1>Snap &amp; <span class="grad">Solve</span></h1>
+        <p class="muted">Photograph a homework question. Krypton won't give you the answer — it coaches you one step at a time, and the next step unlocks only when you get this one right.</p></div>
+      <div class="card" id="snapIn">
+        <div class="drop" id="drop" tabindex="0">
+          <div class="dropmsg" id="dropMsg">📷 <b>Drop a photo here</b>, click to choose one, or paste with <b>Ctrl+V</b></div>
+          <img id="snapImg" alt="" hidden>
+          <input type="file" id="snapFile" accept="image/*" hidden>
+        </div>
+        <div class="row" style="margin-top:10px"><button class="btn-ghost" id="camBtn">🎥 Use webcam</button>
+          <button class="btn-ghost" id="readBtn" disabled>🔍 Read the question</button></div>
+        <video id="cam" autoplay playsinline hidden></video>
+        <div class="field" style="margin-top:12px"><label>Question (edit if needed, or just type it)</label>
+          <textarea id="snapQ" rows="3" placeholder="e.g. Solve: 3x + 7 = 22   /   Find the resistance if V = 12 V and I = 2 A"></textarea></div>
+        <button class="btn-primary" id="solveBtn">Start solving step by step →</button>
+        <div class="muted small-note" id="snapMsg"></div>
+      </div>
+      <div class="out" id="snapOut"></div>
+    </section>
+
+    <!-- VIVA -->
+    <section class="panel" id="tab-viva">
+      <div class="hero"><h1>Viva <span class="grad">practice</span></h1>
+        <p class="muted">An oral exam with Krypton as the examiner. It asks out loud, you answer by speaking (🎤) or typing, and every answer is marked out of 5 against your NCERT book.</p></div>
+      <div class="card" id="vivaSetup">
+        <div class="row">
+          <input id="vivaTopic" placeholder="Topic (optional) — or pick a chapter above" autocomplete="off" style="flex:1">
+          <select id="vivaCount" style="width:auto"><option value="3">3 questions</option><option value="5" selected>5 questions</option><option value="8">8 questions</option></select>
+          <label class="switch" style="margin:0"><input type="checkbox" id="vivaHide"> <span>Hide question text (real viva)</span></label>
+          <button class="btn-primary" id="vivaGo">Start viva</button>
+        </div>
+        <div class="muted small-note" id="vivaMsg"></div>
+      </div>
+      <div class="out" id="vivaOut"></div>
+    </section>
+
+    <!-- LANGUAGE LAB -->
+    <section class="panel" id="tab-langlab">
+      <div class="hero"><h1>Language <span class="grad">Lab</span></h1>
+        <p class="muted">Practise any of India's 22 official languages — learn the script, build vocabulary, translate, speak and chat.</p></div>
+      <div class="card ctxrow">
+        <div class="field" style="margin:0;flex:1"><label>Language</label><select id="labLang"></select></div>
+        <div class="field" style="margin:0"><label>Level</label>
+          <select id="labLevel"><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select></div>
+        <div class="labtabs" id="labTabs">
+          <button data-lab="script" class="active">🔤 Script</button><button data-lab="words">📚 Words</button>
+          <button data-lab="translate">✍️ Translate</button><button data-lab="speak">🎤 Speak</button><button data-lab="chat">💬 Chat</button>
+        </div>
+      </div>
+      <div class="out" id="labOut"></div>
+    </section>
+
+    <!-- PROGRESS -->
+    <section class="panel" id="tab-progress">
+      <div class="hero"><h1>Your <span class="grad">progress</span></h1>
+        <p class="muted">Earn XP for quizzes, revision, solved problems and study time. Hit 100 XP a day to keep your streak alive.</p></div>
+      <div class="grid2">
+        <div class="card levelcard" id="levelCard"></div>
+        <div class="card"><h3>Last 4 weeks</h3><div class="heat" id="heat"></div>
+          <p class="muted small-note">Each square is a day — bright green means the 100 XP goal was hit.</p></div>
+      </div>
+      <div class="card" style="margin-top:16px"><h3>Badges</h3><div class="badges" id="badges"></div></div>
+      <div class="card" style="margin-top:16px"><h3>Friends leaderboard</h3>
+        <div id="board"></div>
+        <div class="grid2" style="margin-top:14px">
+          <div class="field"><label>Your friend code (send it to friends)</label>
+            <div class="row"><input id="myCode" readonly><button class="btn-ghost" id="copyCode">Copy</button></div></div>
+          <div class="field"><label>Add a friend's code</label>
+            <div class="row"><input id="friendCode" placeholder="KRY-…"><button class="btn-primary" id="addFriend">Add</button></div></div>
+        </div>
+        <div class="muted small-note" id="friendMsg"></div>
+      </div>
+    </section>
+
+    <!-- SCHOOL -->
+    <section class="panel" id="tab-school">
+      <div class="hero"><h1>School <span class="grad">notices</span></h1>
+        <p class="muted">Events and reminders from your school, and notes from teachers about you (your parents see these too).</p></div>
+      <div class="grid2">
+        <div class="card"><h3>📅 Upcoming events</h3><div id="schoolEvents"></div></div>
+        <div class="card"><h3>📝 Notes from school</h3><div id="schoolReports"></div></div>
+      </div>
+      <p class="muted small-note">Teachers: open the <a href="#" id="staffLink" style="color:var(--accent)">school admin portal</a>.</p>
+    </section>
+
+    <!-- MARKS -->
+    <section class="panel" id="tab-marks">
+      <div class="hero"><h1>My <span class="grad">marks</span></h1>
+        <p class="muted">Keep track of your exam results. Krypton Agent and your parents can see your progress.</p></div>
+      <div class="grid2">
+        <form class="card" id="profileForm"><h3>About me</h3>
+          <div class="field"><label>Name</label><input id="pName"></div>
+          <div class="row"><div class="field" style="flex:1"><label>Class</label><input type="number" id="pCls" min="1" max="12"></div>
+            <div class="field" style="flex:2"><label>School</label><input id="pSchool"></div></div>
+          <div class="field"><label>My goal</label><input id="pGoal" placeholder="e.g. 95% in Class 10 boards"></div>
+          <button class="btn-primary">Save</button><span class="muted small-note" id="profileMsg"></span></form>
+        <form class="card" id="markForm"><h3>Add exam marks</h3>
+          <div class="field"><label>Exam</label><input id="mExam" placeholder="e.g. Unit Test 2, Half-yearly" required></div>
+          <div class="field"><label>Subject</label><input id="mSubject" placeholder="e.g. Science" required list="subjList"><datalist id="subjList"></datalist></div>
+          <div class="row"><div class="field" style="flex:1"><label>Marks got</label><input type="number" step="0.5" id="mMarks" required></div>
+            <div class="field" style="flex:1"><label>Out of</label><input type="number" step="0.5" id="mMax" required value="80"></div>
+            <div class="field" style="flex:1.4"><label>Date</label><input type="date" id="mDate"></div></div>
+          <button class="btn-primary">Add</button><span class="muted small-note" id="markMsg"></span></form>
+      </div>
+      <div class="card" style="margin-top:16px"><h3>Subject averages</h3><div class="bars" id="subjBars"></div>
+        <h4>All exams</h4><div id="markList"></div></div>
+    </section>
+
+    <!-- EXPLAIN -->
+    <section class="panel active" id="tab-explain">
+      <div class="hero">
+        <h1>Explain it <span class="grad">line by line</span></h1>
+        <p class="muted">Ask anything from your NCERT book. Krypton finds the exact textbook lines and teaches them one at a time.</p>
+      </div>
+      <form class="ask card" data-feature="explain">
+        <input name="query" placeholder="e.g. Why does a spoon look bent in water?  /  प्रकाश संश्लेषण क्या है?" autocomplete="off">
+        <button class="btn-primary">Explain</button>
+      </form>
+      <div class="out" id="out-explain"></div>
+    </section>
+
+    <!-- MIND MAP -->
+    <section class="panel" id="tab-mindmap">
+      <div class="hero"><h1>Mind <span class="grad">map</span></h1>
+        <p class="muted">See a whole chapter at a glance — big ideas, key terms and examples branching from the centre. Hover any box for a simple explanation.</p></div>
+      <form class="ask card" data-feature="mindmap">
+        <input name="query" placeholder="Topic (optional) — e.g. Electricity, or leave empty and pick a chapter above" autocomplete="off">
+        <button class="btn-primary">Draw map</button>
+      </form>
+      <div class="out" id="out-mindmap"></div>
+    </section>
+
+    <!-- FLASHCARDS -->
+    <section class="panel" id="tab-flashcards">
+      <div class="hero"><h1>Flash<span class="grad">cards</span></h1>
+        <p class="muted">Turn any topic or chapter into revision cards. Click a card to flip it.</p></div>
+      <form class="ask card" data-feature="flashcards">
+        <input name="query" placeholder="Topic (optional) — leave empty to use the selected chapters" autocomplete="off">
+        <select name="count" class="small"><option>8</option><option selected>12</option><option>20</option><option>30</option></select>
+        <button class="btn-primary">Make cards</button>
+      </form>
+      <div class="out" id="out-flashcards"></div>
+      <div class="saved card" id="decks"></div>
+    </section>
+
+    <!-- QUIZ -->
+    <section class="panel" id="tab-quiz">
+      <div class="hero"><h1>Quiz <span class="grad">yourself</span></h1>
+        <p class="muted">CBSE-style MCQs with instant feedback and explanations.</p></div>
+      <form class="ask card" data-feature="quiz">
+        <input name="query" placeholder="Topic (optional)" autocomplete="off">
+        <select name="count" class="small"><option>5</option><option selected>10</option><option>15</option><option>20</option></select>
+        <select name="difficulty" class="small"><option value="mixed">Mixed</option><option value="easy">Easy</option><option value="hard">Hard</option></select>
+        <button class="btn-primary">Start quiz</button>
+      </form>
+      <div class="out" id="out-quiz"></div>
+    </section>
+
+    <!-- PAPER -->
+    <section class="panel" id="tab-paper">
+      <div class="hero"><h1>CBSE <span class="grad">question paper</span></h1>
+        <p class="muted">Sections A–E, board-style marks and an answer key. Print or save as PDF.</p></div>
+      <form class="ask card" data-feature="paper">
+        <input name="query" placeholder="Focus topic (optional)" autocomplete="off">
+        <select name="paper_type" class="small"><option value="full">Full paper</option><option value="chapter">Chapter test (20)</option></select>
+        <button class="btn-primary">Generate paper</button>
+      </form>
+      <div class="out" id="out-paper"></div>
+    </section>
+
+    <!-- GUIDE -->
+    <section class="panel" id="tab-guide">
+      <div class="hero"><h1>Study <span class="grad">guide</span></h1>
+        <p class="muted">A day-by-day plan, tips and exam strategy for the chapters you pick.</p></div>
+      <form class="ask card" data-feature="guide">
+        <input name="query" placeholder="Your goal, e.g. 'Unit test on Friday' or 'score 95 in boards'" autocomplete="off">
+        <select name="days" class="small"><option value="3">3 days</option><option value="7" selected>7 days</option><option value="14">14 days</option><option value="30">30 days</option></select>
+        <button class="btn-primary">Make my plan</button>
+      </form>
+      <div class="out" id="out-guide"></div>
+    </section>
+
+    <!-- FOCUS -->
+    <section class="panel" id="tab-focus">
+      <div class="hero"><h1>Focus <span class="grad">&amp; stats</span></h1>
+        <p class="muted">Krypton tracks your time online. When scrolling time runs out, distracting sites lock until you finish a study task.</p></div>
+      <div class="grid2">
+        <div class="card">
+          <h3>Focus lock <span class="pill">👪 set by parent</span></h3>
+          <div class="sys" id="rulesView"></div>
+          <div class="row" style="margin-top:14px"><button class="btn-ghost" id="openParent">👪 Parent board</button>
+            <button class="btn-danger" id="lockNow">🔒 Lock now (demo)</button></div>
+          <div class="muted small-note" id="focusMsg"></div>
+        </div>
+        <div class="card">
+          <h3>Today</h3>
+          <div class="kpis" id="kpis"></div>
+          <h4>Where your time went</h4>
+          <div class="bars" id="siteBars"></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <h3>Last 7 days</h3>
+        <div class="week" id="week"></div>
+        <h4>Quiz scores</h4>
+        <div id="quizHistory" class="muted"></div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="panel" id="tab-settings">
+      <div class="hero"><h1><span class="grad">Settings</span></h1>
+        <p class="muted">Pick how Krypton thinks. If an engine is unavailable it falls back automatically: Groq → Local GPU → Offline.</p></div>
+      <div class="grid2">
+        <div class="card">
+          <h3>⚡ Groq cloud AI</h3>
+          <p class="muted">The Groq key is set by a parent in the <b>Parent board</b> (it's also the parent login).</p>
+          <div class="field"><label>Groq model</label><input id="groqModel"></div>
+          <h3 style="margin-top:20px">🖥 Local GPU AI (Ollama)</h3>
+          <div class="field"><label>Local model</label><input id="ollamaModel"></div>
+          <h3 style="margin-top:20px">🤖 Agent workspace</h3>
+          <div class="field"><label>Folder the agent may read &amp; edit (full path)</label><input id="agentWorkspace"></div>
+          <div class="row"><button class="btn-primary" id="saveSettings">Save settings</button>
+            <button type="button" class="btn-ghost" id="openParent2">👪 Parent board</button></div>
+          <div class="muted small-note" id="settingsMsg"></div>
+        </div>
+        <div class="card">
+          <h3>System status</h3>
+          <div id="sys" class="sys"></div>
+          <button class="btn-ghost" id="refreshSys" style="margin-top:12px">Refresh</button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+<script src="shared.js"></script>
+<script src="app.js"></script>
+<script src="fx3d.js"></script>
+<script src="intro.js"></script>
+</body>
+</html>

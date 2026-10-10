@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Krypton</title>
+  <link rel="stylesheet" href="theme.css">
+  <script src="theme-init.js"></script>
+  <style>
+    body { width: 340px; padding: 16px; }
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .ring { position: relative; width: 120px; height: 120px; margin: 0 auto; }
+    .ring svg { transform: rotate(-90deg); }
+    .ring .c { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; }
+    .ring .c b { font-size: 24px; display: block; line-height: 1; }
+    .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 14px 0; }
+    .stat { background: rgba(var(--shade),calc(.25*var(--sk))); border: 1px solid var(--line); border-radius: 12px; padding: 10px; }
+    .stat b { font-size: 18px; display: block; }
+    .actions { display: grid; gap: 8px; margin-top: 12px; }
+    .label { font-size: 12px; color: var(--muted); margin: 12px 0 6px; text-transform: uppercase; letter-spacing: .12em; }
+    .share { display: flex; align-items: center; gap: 8px; font-size: 12px; padding: 8px 10px; border-radius: 10px;
+      background: rgba(var(--a),.08); border: 1px solid var(--line); }
+    .share span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--accent); }
+    .share button { padding: 5px 10px; font-size: 12px; }
+    #locked { display: none; text-align: center; margin-top: 8px; color: var(--warn); font-weight: 600; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand"><div class="gem"></div>KRYPTON</div>
+    <span class="pill"><span class="dot" id="dot"></span><span id="conn">checking…</span></span>
+  </header>
+
+  <div class="ring">
+    <svg width="120" height="120"><circle cx="60" cy="60" r="52" stroke="rgba(255,255,255,.08)" stroke-width="10" fill="none"/>
+      <circle id="arc" cx="60" cy="60" r="52" stroke="url(#g)" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="327" stroke-dashoffset="327"/>
+      <defs><linearGradient id="g"><stop offset="0" style="stop-color:var(--lime)"/><stop offset="1" style="stop-color:var(--accent2)"/></linearGradient></defs></svg>
+    <div class="c"><div><b id="used">0m</b><span class="muted" id="limit">of 15m scroll</span></div></div>
+  </div>
+  <div id="locked">🔒 Distracting sites are locked</div>
+
+  <div class="stats">
+    <div class="stat"><span class="muted">Studied today</span><b id="study">0m</b></div>
+    <div class="stat"><span class="muted">Distracted today</span><b id="distracted">0m</b></div>
+  </div>
+
+  <div class="share" id="share" hidden>🌍 <span id="shareUrl"></span><button class="btn-ghost" id="copyLink">Copy</button></div>
+  <div class="label">Theme</div>
+  <div data-theme-picker></div>
+  <div class="label">AI mode</div>
+  <div class="seg" id="modes">
+    <button data-mode="groq">⚡ Groq</button>
+    <button data-mode="local">🖥 Local</button>
+    <button data-mode="offline">📘 Offline</button>
+  </div>
+
+  <div class="actions">
+    <button class="btn-primary" id="open">Open Krypton</button>
+    <button class="btn-ghost" id="lock">🔒 Lock distracting sites now</button>
+    <button class="btn-ghost" id="parent">👪 Parent board</button>
+  </div>
+  <script src="shared.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
