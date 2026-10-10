@@ -1,5 +1,5 @@
 .layout { display: grid; grid-template-columns: 250px 1fr; min-height: 100vh; }
-.side { position: sticky; top: 0; height: 100vh; padding: 22px 16px; border-right: 1px solid var(--line);
+.side { position: sticky; top: 0; height: 100vh; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; padding: 22px 16px; border-right: 1px solid var(--line);
   background: rgba(var(--shade),calc(.6*var(--sk))); display: flex; flex-direction: column; gap: 6px; }
 .brand.big { font-size: 20px; }
 .tag { font-size: 12px; margin: 2px 0 18px 34px; }
@@ -8,7 +8,7 @@ nav button { display: flex; gap: 12px; align-items: center; text-align: left; ba
   padding: 11px 12px; font-weight: 600; }
 nav button span { width: 22px; text-align: center; }
 nav button:hover { background: rgba(var(--hi),calc(.05*var(--hk))); color: var(--text); }
-nav button.active { background: rgba(var(--a),.1); color: var(--text); box-shadow: inset 3px 0 0 var(--accent); }
+nav button.active { background: rgba(var(--a),.14); color: var(--text); font-weight: 700; }
 .side-foot { margin-top: auto; display: grid; gap: 10px; }
 .label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .14em; }
 .status { justify-content: center; }

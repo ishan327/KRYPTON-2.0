@@ -22,8 +22,9 @@ html.fx3d .btn-primary { box-shadow: 0 4px 0 rgba(var(--shade), calc(.55 * var(-
 html.fx3d .btn-primary:active { box-shadow: 0 1px 0 rgba(var(--shade), calc(.55 * var(--sk))), 0 3px 10px rgba(var(--a), .2); transform: translateY(2px); }
 html.fx3d .btn-ghost:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(var(--shade), calc(.3 * var(--sk))); }
 /* headings with layered depth */
-html.fx3d .hero h1 { text-shadow: 0 1px 0 rgba(var(--a), .25), 0 2px 0 rgba(var(--a), .18), 0 3px 0 rgba(var(--a), .12), 0 10px 24px rgba(var(--shade), calc(.5 * var(--sk))); }
-html.fx3d nav button.active { transform: translateX(3px); box-shadow: inset 3px 0 0 var(--accent), 0 6px 18px rgba(var(--a), .12); }
+html.fx3d .hero h1 { text-shadow: 0 10px 24px rgba(var(--shade), calc(.5 * var(--sk))); }
+html.fx3d .hero h1 .grad, .hero h1 .grad { text-shadow: none; }
+html.fx3d nav button.active { transform: translateX(3px); box-shadow: 0 6px 18px rgba(var(--shade), calc(.35 * var(--sk))); }
 /* the spinning crystal logo */
 .crystal3d { display: inline-block; flex: none; filter: drop-shadow(0 0 12px rgba(var(--a), .55)); }
 .fx3d-toggle { width: 100%; padding: 7px 10px; font-size: 13px; }
