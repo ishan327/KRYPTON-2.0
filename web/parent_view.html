@@ -9,6 +9,7 @@
   <script src="/ext/theme-init.js"></script>
   <link rel="stylesheet" href="/ext/app.css">
   <link rel="stylesheet" href="/ext/responsive.css">
+  <link rel="stylesheet" href="/ext/fx3d.css">
   <style>
     .gate { min-height: 100vh; display: grid; place-items: center; padding: 16px; }
     .gate .card { width: min(420px, 100%); padding: 28px; }
@@ -130,5 +131,7 @@
   $("out").onclick =() => { try { sessionStorage.removeItem("krypton.parentview"); } catch (e) { /* ignore */ } location.reload(); };
   if (token) load().catch(() => {});
 </script>
+<script src="/ext/fx3d.js"></script>
+<script src="/ext/intro.js"></script>
 </body>
 </html>
