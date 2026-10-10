@@ -37,7 +37,7 @@ app = FastAPI(title="Krypton", version=VERSION)
 app.add_middleware(CORSMiddleware, allow_origin_regex=r"chrome-extension://.*|http://localhost:8766", allow_methods=["*"], allow_headers=["*"])
 
 # Things only the laptop owner (the Chrome extension on 127.0.0.1) may use — never web accounts.
-OWNER_ONLY = ("/api/settings", "/api/parent", "/api/focus", "/api/reload", "/api/usage", "/api/rules", "/api/public-url")
+OWNER_ONLY = ("/api/settings", "/api/parent", "/api/reload", "/api/public-url")  # rules/usage/focus are per account
 
 
 @app.middleware("http")
@@ -876,9 +876,24 @@ def parent_web_overview(x_parent_view: str | None = Header(None)):
     ctx = users.current_user.set(uid)  # read everything as that student
     try:
         return {"student": users.info(uid), "profile": family.profile(), "records": family.records(),
-                "game": growth.game(), "review": growth.review_overview(), "school": school.feed(uid)}
+                "game": growth.game(), "review": growth.review_overview(), "school": school.feed(uid),
+                "rules": family.rules(), "usage": family._uload().get("usage") or {}}
     finally:
         users.current_user.reset(ctx)
+
+
+@app.post("/parent-api/rules")
+def parent_web_rules(r: RulesReq, x_parent_view: str | None = Header(None)):
+    uid = users.parent_resolve(x_parent_view)
+    if not uid:
+        raise HTTPException(401, "Please log in again.")
+    ctx = users.current_user.set(uid)  # save as that student's rules
+    try:
+        rules = family.set_rules({k: v for k, v in r.model_dump().items() if v is not None})
+    finally:
+        users.current_user.reset(ctx)
+    log_event("settings", None, f"👪 lock rules for @{users.info(uid)['username']}: {rules['limit_minutes']} → {rules['lock_minutes']} min")
+    return rules
 
 
 @app.get("/parent-view")

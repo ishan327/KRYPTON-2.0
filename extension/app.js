@@ -670,6 +670,38 @@ async function renderSettings() {
     row("Current mode", ENGINE_LABEL[s.mode], true);
 }
 $("refreshSys").onclick = renderSettings;
+
+// ---------------- which Krypton server the extension uses ----------------
+async function setServer(conf) {
+  await chrome.storage.local.set({ server: conf, rules: null });  // background worker reads this
+  try {
+    if (conf) { localStorage.setItem("krypton.serverUrl", conf.url); localStorage.setItem("krypton.serverToken", conf.token); }
+    else { localStorage.removeItem("krypton.serverUrl"); localStorage.removeItem("krypton.serverToken"); }
+  } catch (e) { /* ignore */ }
+  chrome.runtime.sendMessage({ type: "serverChanged" });
+  location.reload();
+}
+function showServer() {
+  if (!chrome?.storage?.local || location.protocol.startsWith("http")) return;
+  chrome.storage.local.get(["server"]).then(({ server }) => {
+    $("srvNow").innerHTML = server?.url ? `Connected to <b>${esc(server.url)}</b> as <b>@${esc(server.username || "")}</b>.` : "Using <b>this laptop</b> (default).";
+    if (server?.url) $("srvUrl").value = server.url;
+  });
+}
+$("srvConnect").onclick = async () => {
+  const url = $("srvUrl").value.trim().replace(/\/+$/, "");
+  if (!/^https:\/\/.+/.test(url)) { $("srvMsg").textContent = "Paste the full https:// link of the online Krypton."; return; }
+  $("srvMsg").textContent = "Connecting…";
+  try {
+    const r = await fetch(url + "/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: $("srvUser").value, password: $("srvPw").value }) });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.detail || "Couldn't log in");
+    await setServer({ url, token: d.token, username: d.user.username });
+  } catch (err) { $("srvMsg").textContent = "Couldn't connect: " + err.message + " (if it's a Render free site, open it once in a tab to wake it, then retry)."; }
+};
+$("srvLocal").onclick = () => setServer(null);
+showServer();
 $("saveSettings").onclick = async () => {
   const body = { groq_model: $("groqModel").value.trim(), ollama_model: $("ollamaModel").value.trim(),
                  agent_workspace: $("agentWorkspace").value.trim() || null };

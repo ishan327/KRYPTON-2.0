@@ -12,7 +12,7 @@
   },
   "background": { "service_worker": "background.js" },
   "permissions": ["storage", "tabs", "alarms", "notifications"],
-  "host_permissions": ["http://127.0.0.1:8765/*", "http://localhost:8765/*"],
+  "host_permissions": ["http://127.0.0.1:8765/*", "http://localhost:8765/*", "https://*.onrender.com/*", "https://*.trycloudflare.com/*"],
   "content_scripts": [
     {
       "matches": ["http://*/*", "https://*/*"],

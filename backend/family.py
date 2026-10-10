@@ -62,7 +62,7 @@ def _usave(d: dict):
     f = _ufile()
     if f == FAMILY_FILE:  # owner's file also holds the parent account: merge, don't overwrite
         full = _load()
-        full.update({k: d[k] for k in ("profile", "records", "usage", "quizzes") if k in d})
+        full.update({k: d[k] for k in ("profile", "records", "usage", "quizzes") if k in d})  # owner rules are saved by _save
         d = full
     f.parent.mkdir(parents=True, exist_ok=True)
     f.write_text(json.dumps(d, indent=1, ensure_ascii=False), encoding="utf-8")
@@ -151,12 +151,15 @@ def require(token: str | None):
 
 # ---------------- rules ----------------
 def rules() -> dict:
-    return {**DEFAULT_RULES, **(_load().get("rules") or {})}
+    # A website account has its own rules (set by its parent in the parent view); the laptop uses the Parent board's.
+    src = _uload() if users.current_user.get() else _load()
+    return {**DEFAULT_RULES, **(src.get("rules") or {})}
 
 
 def set_rules(changes: dict) -> dict:
+    web = bool(users.current_user.get())
     with _lock:
-        d = _load()
+        d = _uload() if web else _load()
         r = {**DEFAULT_RULES, **(d.get("rules") or {})}
         for k, v in changes.items():
             if k in DEFAULT_RULES and v is not None:
@@ -167,8 +170,9 @@ def set_rules(changes: dict) -> dict:
         r["blocked_sites"] = sorted({s.strip().lower().removeprefix("https://").removeprefix("http://")
                                      .removeprefix("www.").split("/")[0] for s in r["blocked_sites"] if s.strip()})
         d["rules"] = r
-        _save(d)
-    settings.update({"unlock_pass": r["unlock_pass"]})
+        _usave(d) if web else _save(d)
+    if not web:
+        settings.update({"unlock_pass": r["unlock_pass"]})
     return r
 
 

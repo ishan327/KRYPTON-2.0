@@ -334,7 +334,16 @@
           <div class="muted small-note" id="settingsMsg"></div>
         </div>
         <div class="card">
-          <h3>System status</h3>
+          <h3>🌐 Krypton server</h3>
+          <p class="muted" id="srvNow"></p>
+          <div class="field"><label>Online Krypton link (e.g. your Render site)</label><input id="srvUrl" placeholder="https://krypton-v2.onrender.com"></div>
+          <div class="row"><div class="field" style="flex:1"><label>Student username</label><input id="srvUser" autocapitalize="off"></div>
+            <div class="field" style="flex:1"><label>Password</label><input id="srvPw" type="password"></div></div>
+          <div class="row"><button class="btn-primary" id="srvConnect">Connect to online Krypton</button>
+            <button class="btn-ghost" id="srvLocal">Use this laptop instead</button></div>
+          <p class="muted small-note">Online: the focus lock, rules and progress come from that site (the parent sets lock rules in its Parent view). Laptop: everything runs here, as before.</p>
+          <div class="muted small-note" id="srvMsg"></div>
+          <h3 style="margin-top:18px">System status</h3>
           <div id="sys" class="sys"></div>
           <button class="btn-ghost" id="refreshSys" style="margin-top:12px">Refresh</button>
         </div>

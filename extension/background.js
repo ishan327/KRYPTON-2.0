@@ -116,6 +116,9 @@ async function handle(msg) {
     case "unlockOffline": // backend unreachable: content script verified a built-in maths task
       if (rules.allow_quiz_unlock) await unlock();
       return { ok: rules.allow_quiz_unlock };
+    case "serverChanged":  // switched between this laptop and an online Krypton: fetch that server's rules now
+      await syncRules();
+      return { ok: true };
     case "openApp":
       chrome.tabs.create({ url: chrome.runtime.getURL("app.html") });
       return { ok: true };
