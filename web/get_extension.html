@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Get Krypton for Chrome</title>
+  <link rel="icon" href="/ext/icons/logo.svg">
+  <link rel="stylesheet" href="/ext/theme.css">
+  <script src="/ext/theme-init.js"></script>
+  <link rel="stylesheet" href="/ext/app.css">
+  <style>
+    .wrap { max-width: 760px; margin: 0 auto; padding: 32px 16px 60px; }
+    .big { font-size: 18px; padding: 16px 28px; }
+    ol.steps { counter-reset: s; list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+    ol.steps li { counter-increment: s; display: grid; grid-template-columns: 38px 1fr; gap: 12px; align-items: start; }
+    ol.steps li::before { content: counter(s); width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center;
+      font-weight: 800; background: rgba(var(--a), .15); color: var(--accent); }
+    code { background: rgba(var(--hi), calc(.08 * var(--hk))); padding: 2px 7px; border-radius: 6px; font-family: Consolas, monospace; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="brand big"><div class="gem"></div>KRYPTON</div>
+    <h1 style="font-size:32px;margin:18px 0 6px">Get Krypton for <span class="grad">Chrome</span></h1>
+    <p class="muted">The Chrome extension adds the <b>focus lock</b> (stops endless scrolling on YouTube, Instagram…) and Krypton in your browser toolbar. Works on laptops and PCs with Chrome or Edge — not on phones.</p>
+    <div class="card" style="text-align:center;margin:20px 0">
+      <a href="/download/krypton-extension.zip" class="btn-primary big" style="display:inline-block;text-decoration:none">⬇ Download Krypton extension</a>
+      <p class="muted small-note" style="margin-top:12px">A small .zip file, already set up for this Krypton site.</p>
+    </div>
+    <div class="card">
+      <h3>Install it (2 minutes)</h3>
+      <ol class="steps">
+        <li><span>Open the downloaded <b>krypton-extension.zip</b> → right-click → <b>Extract All</b> → Extract.</span></li>
+        <li><span>In Chrome, open <code>chrome://extensions</code> (copy it into the address bar).</span></li>
+        <li><span>Turn on <b>Developer mode</b> (switch at the top right).</span></li>
+        <li><span>Click <b>Load unpacked</b> → select the <b>krypton-extension</b> folder you extracted.</span></li>
+        <li><span>Click the 🧩 puzzle icon in the toolbar → pin <b>Krypton 💎</b>.</span></li>
+        <li><span>Open Krypton → <b>⚙️ Settings</b> → <b>🌐 Krypton server</b>: the link is already filled in — type your <b>username and password</b> → <b>Connect</b>. Done!</span></li>
+      </ol>
+      <p class="muted small-note" style="margin-top:14px">Chrome may show a "developer mode extensions" notice when it starts — just close it. Parents set the lock rules at <a href="/parent-view" style="color:var(--accent)">Parent view</a>.</p>
+    </div>
+    <p class="muted small-note" style="margin-top:18px"><a href="/login" style="color:var(--accent)">← Back to Krypton</a></p>
+  </div>
+</body>
+</html>

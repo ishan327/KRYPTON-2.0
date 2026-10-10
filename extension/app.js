@@ -683,9 +683,13 @@ async function setServer(conf) {
 }
 function showServer() {
   if (!chrome?.storage?.local || location.protocol.startsWith("http")) return;
-  chrome.storage.local.get(["server"]).then(({ server }) => {
+  chrome.storage.local.get(["server"]).then(async ({ server }) => {
     $("srvNow").innerHTML = server?.url ? `Connected to <b>${esc(server.url)}</b> as <b>@${esc(server.username || "")}</b>.` : "Using <b>this laptop</b> (default).";
-    if (server?.url) $("srvUrl").value = server.url;
+    if (server?.url) { $("srvUrl").value = server.url; return; }
+    try {  // downloaded from an online Krypton? its link comes with the extension
+      const p = await (await fetch(chrome.runtime.getURL("preset.json"))).json();
+      if (p.server) { $("srvUrl").value = p.server; $("srvNow").innerHTML = `Ready to connect to <b>${esc(p.server)}</b> — type your username and password below.`; }
+    } catch (e) { /* no preset: laptop install */ }
   });
 }
 $("srvConnect").onclick = async () => {

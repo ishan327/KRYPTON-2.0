@@ -1,4 +1,5 @@
 """Krypton backend — run this, then use the Chrome extension."""
+import json
 import secrets
 import subprocess
 import sys
@@ -899,6 +900,30 @@ def parent_web_rules(r: RulesReq, x_parent_view: str | None = Header(None)):
 @app.get("/parent-view")
 def web_parent_view():
     return HTMLResponse((WEB_DIR / "parent_view.html").read_text(encoding="utf-8"), headers={"Cache-Control": "no-store"})
+
+
+# ---------------- download the Chrome extension (pre-set to this site) ----------------
+@app.get("/download/krypton-extension.zip")
+def download_extension(request: Request):
+    import io
+    import zipfile
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+        for f in EXT_DIR.rglob("*"):
+            if f.is_file() and f.name != "preset.json":
+                z.write(f, "krypton-extension/" + f.relative_to(EXT_DIR).as_posix())
+        proto = request.headers.get("x-forwarded-proto", request.url.scheme)
+        base = f"{proto}://{request.headers.get('host', '')}"
+        if base.startswith("https://"):  # online site: the extension offers to connect to it
+            z.writestr("krypton-extension/preset.json", json.dumps({"server": base}))
+    log_event("settings", None, "⬇ Chrome extension downloaded")
+    return Response(buf.getvalue(), media_type="application/zip",
+                    headers={"Content-Disposition": 'attachment; filename="krypton-extension.zip"'})
+
+
+@app.get("/get-extension")
+def web_get_extension():
+    return HTMLResponse((WEB_DIR / "get_extension.html").read_text(encoding="utf-8"), headers={"Cache-Control": "no-store"})
 
 
 # ---------------- web version of the app ----------------
