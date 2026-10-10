@@ -835,6 +835,57 @@ def web_school():
     return HTMLResponse(page, headers={"Cache-Control": "no-store"})
 
 
+# ---------------- parent view on the website (per student account, PIN set by the student) ----------------
+class ParentPinReq(BaseModel):
+    pin: str
+
+
+class ParentWebLoginReq(BaseModel):
+    username: str
+    pin: str
+
+
+@app.get("/api/my-parent-pin")
+def parent_pin_status():
+    uid = users.current_user.get()
+    return {"web_account": bool(uid), "set": bool(uid) and users.has_parent_pin(uid)}
+
+
+@app.post("/api/my-parent-pin")
+def parent_pin_set(r: ParentPinReq):
+    uid = users.current_user.get()
+    if not uid:
+        raise HTTPException(400, "On the laptop, parents use the Parent board instead.")
+    _guard(users.set_parent_pin, uid, r.pin)
+    log_event("settings", None, "👪 parent PIN set for this account")
+    return {"ok": True}
+
+
+@app.post("/parent-api/login")
+def parent_web_login(r: ParentWebLoginReq):
+    token = _guard(users.parent_login, r.username, r.pin)
+    log_event("settings", None, f"👪 parent of @{r.username.strip().lower()} logged in")
+    return {"token": token}
+
+
+@app.get("/parent-api/overview")
+def parent_web_overview(x_parent_view: str | None = Header(None)):
+    uid = users.parent_resolve(x_parent_view)
+    if not uid:
+        raise HTTPException(401, "Please log in again.")
+    ctx = users.current_user.set(uid)  # read everything as that student
+    try:
+        return {"student": users.info(uid), "profile": family.profile(), "records": family.records(),
+                "game": growth.game(), "review": growth.review_overview(), "school": school.feed(uid)}
+    finally:
+        users.current_user.reset(ctx)
+
+
+@app.get("/parent-view")
+def web_parent_view():
+    return HTMLResponse((WEB_DIR / "parent_view.html").read_text(encoding="utf-8"), headers={"Cache-Control": "no-store"})
+
+
 # ---------------- web version of the app ----------------
 WEB_DIR = Path(__file__).resolve().parent.parent / "web"
 EXT_DIR = Path(__file__).resolve().parent.parent / "extension"

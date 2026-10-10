@@ -13,7 +13,7 @@ function showTab(name) {
   if (name === "progress") renderProgress();
   if (name === "focus") renderFocus();
   if (name === "settings") renderSettings();
-  if (name === "marks") renderMarks();
+  if (name === "marks") { renderMarks(); loadPinCard(); }
   if (name === "agent") $("agentInput").focus();
   try { localStorage.setItem("krypton.tab", name); } catch (e) { /* storage blocked */ }
 }
@@ -410,6 +410,19 @@ async function renderMarks() {
     renderMarks();
   });
 }
+// Parent PIN (website accounts only): lets a parent see this student's progress at /parent-view
+async function loadPinCard() {
+  try {
+    const s = await api("/api/my-parent-pin");
+    $("pinCard").hidden = !s.web_account;
+    $("pinMsg").textContent = s.set ? "✓ A parent PIN is set. Saving a new one replaces it." : "";
+  } catch (e) { $("pinCard").hidden = true; }
+}
+$("pinSave").onclick = async () => {
+  try { await api("/api/my-parent-pin", { pin: $("pinIn").value }); $("pinIn").value = ""; $("pinMsg").textContent = "✓ Saved — tell your parent the PIN."; }
+  catch (err) { $("pinMsg").textContent = err.message; }
+};
+
 $("profileForm").onsubmit = async e => {
   e.preventDefault();
   await api("/api/profile", { name: $("pName").value.trim(), cls: Number($("pCls").value) || null, school: $("pSchool").value.trim(), goal: $("pGoal").value.trim() });

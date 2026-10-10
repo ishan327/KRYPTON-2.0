@@ -138,3 +138,41 @@ def delete(uid: str):
     for t in [t for t, (u, _) in _tokens.items() if u == uid]:
         _tokens.pop(t)
     _save_tokens()
+
+
+# ---------------- parent view on the website (each student account can give a parent a PIN) ----------------
+_ptokens: dict[str, tuple[str, float]] = {}
+
+
+def set_parent_pin(uid: str, pin: str):
+    pin = pin.strip()
+    if not pin.isdigit() or not 4 <= len(pin) <= 8:
+        raise ValueError("The parent PIN must be 4-8 digits.")
+    with _lock:
+        d = _load()
+        if uid not in d:
+            raise PermissionError("Please log in.")
+        salt = secrets.token_hex(16)
+        d[uid]["parent_salt"], d[uid]["parent_hash"] = salt, _hash(pin, salt)
+        _save(d)
+
+
+def has_parent_pin(uid: str) -> bool:
+    return bool(_load().get(uid, {}).get("parent_hash"))
+
+
+def parent_login(username: str, pin: str) -> str:
+    d = _load()
+    uid = next((k for k, u in d.items() if u["username"] == username.strip().lower()), None)
+    u = d.get(uid or "", {})
+    if not u.get("parent_hash") or not hmac.compare_digest(_hash(pin.strip(), u["parent_salt"]), u["parent_hash"]):
+        time.sleep(1)
+        raise PermissionError("Wrong username or parent PIN (the student sets the PIN in My Marks).")
+    t = secrets.token_urlsafe(24)
+    _ptokens[t] = (uid, time.time() + 12 * 3600)
+    return t
+
+
+def parent_resolve(token: str | None) -> str | None:
+    uid, exp = _ptokens.get(token or "", (None, 0))
+    return uid if exp > time.time() and uid in _load() else None

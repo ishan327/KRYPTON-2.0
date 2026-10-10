@@ -209,6 +209,10 @@
       </div>
       <div class="card" style="margin-top:16px"><h3>Subject averages</h3><div class="bars" id="subjBars"></div>
         <h4>All exams</h4><div id="markList"></div></div>
+      <div class="card" id="pinCard" style="margin-top:16px" hidden><h3>👪 Parent access</h3>
+        <p class="muted">Set a PIN for your parent. They open the Krypton link → <b>Parent? See your child's progress</b>, then enter your username and this PIN to see your marks, progress and school notes.</p>
+        <div class="row"><input id="pinIn" type="password" inputmode="numeric" maxlength="8" placeholder="4-8 digit PIN" style="max-width:200px"><button class="btn-primary" id="pinSave">Save PIN</button></div>
+        <span class="muted small-note" id="pinMsg"></span></div>
     </section>
 
     <!-- EXPLAIN -->
