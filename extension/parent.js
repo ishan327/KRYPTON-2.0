@@ -14,10 +14,23 @@ function show(view) {
   ["setup", "login", "board"].forEach(v => { $(v).hidden = v !== view; });
 }
 
+// Where parents go online: the server this extension is connected to, else the site it was downloaded from.
+async function onlineSite() {
+  if (API !== LOCAL_API) return API;
+  try { return (await (await fetch(chrome.runtime.getURL("preset.json"))).json()).server || null; } catch (e) { return null; }
+}
+
 async function start() {
+  const site = await onlineSite();
+  if (API !== LOCAL_API && site) { location.replace(site + "/parent-view"); return; }  // connected to an online Krypton
   let st;
   try { st = await api("/api/parent/status"); } catch (e) {
-    document.body.innerHTML = `<div class="gate"><div class="card err">Krypton's backend is offline — run <b>start_krypton.bat</b>, then reload.</div></div>`;
+    // No Krypton running on this laptop (e.g. a friend's laptop): send parents to the online Parent view
+    if (site) { location.replace(site + "/parent-view"); return; }
+    document.body.innerHTML = `<div class="gate"><div class="card">
+      <h3>👪 Parent view</h3><p class="muted">This laptop doesn't run its own Krypton. Parents can open the online Parent view on the Krypton website:
+      <b>your Krypton link + /parent-view</b> (e.g. krypton-2-0.onrender.com/parent-view), then log in with the child's username and parent PIN.</p>
+      <p class="muted small-note">If this is the main Krypton laptop, start it with <b>start_krypton.bat</b> and reload.</p></div></div>`;
     return;
   }
   if (!st.setup) return show("setup");

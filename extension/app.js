@@ -112,7 +112,7 @@ document.querySelectorAll("form.ask").forEach(form => form.onsubmit = async e =>
     if (feature !== "quiz") api("/api/xp", { event: feature }).then(gainXp, () => {});
   } catch (err) {
     out.innerHTML = `<div class="err"><b>Couldn't reach Krypton's backend.</b><br>${esc(err.message)}<br>
-      <span class="muted">Start it with <code>start_krypton.bat</code> in the krypton folder.</span></div>`;
+      <span class="muted">On a friend's laptop: open <b>⚙️ Settings → 🌐 Krypton server</b> and connect to the online Krypton. On the main laptop: run <code>start_krypton.bat</code>.</span></div>`;
   } finally { btn.disabled = false; }
 });
 
