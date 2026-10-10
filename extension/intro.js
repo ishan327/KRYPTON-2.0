@@ -46,12 +46,25 @@
         #kintro .ctl button { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.18); color: #fff; border-radius: 99px; padding: 5px 10px; cursor: pointer; font-size: 14px; }
         @keyframes ksweep { to { background-position: -50% 0; } }
         @keyframes kblink { 50% { opacity: 0; } }
+        #kintro .gate { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 22px; z-index: 3;
+          background: radial-gradient(ellipse at center, #07120d 0%, #000 72%); transition: opacity .35s; }
+        #kintro .gate img { width: 96px; height: 96px; filter: drop-shadow(0 0 24px ${ACC}); animation: kbreathe 2.2s ease-in-out infinite; }
+        #kintro .gate .go { font: 700 17px "Segoe UI", system-ui, sans-serif; letter-spacing: .12em; color: #04170b; border: 0; border-radius: 99px;
+          padding: 14px 30px; cursor: pointer; background: linear-gradient(135deg, rgb(${C1}), rgb(${C2}) 55%, rgb(${C3})); box-shadow: 0 0 30px ${ACC}; }
+        #kintro .gate .go:hover { filter: brightness(1.1); transform: scale(1.04); }
+        #kintro .gate .hint { color: rgba(255,255,255,.45); font-size: 12px; letter-spacing: .14em; }
+        #kintro .gate .skipg { color: rgba(255,255,255,.35); font-size: 12px; text-decoration: underline; cursor: pointer; background: none; border: 0; }
+        #kintro.gated .ctl { opacity: 0; pointer-events: none; }
+        @keyframes kbreathe { 50% { transform: scale(1.07); filter: drop-shadow(0 0 40px ${ACC}); } }
         @media (max-width: 600px) { #kintro .badge { width: 70px; height: 70px; } #kintro .lock { gap: 12px; } #kintro .tag { top: calc(50% + 54px); font-size: 11px; } }
       </style>
       <canvas></canvas>
       <div class="lock"><img class="badge" src="${logoSrc}" alt=""><div class="clip"><div class="word">KRYPTON</div></div></div>
       <div class="tag"></div>
-      <div class="ctl"><button type="button" class="snd" title="Intro sound">${soundOn ? "🔊" : "🔇"}</button><span>click to skip</span></div>`;
+      <div class="ctl"><button type="button" class="snd" title="Intro sound">${soundOn ? "🔊" : "🔇"}</button><span>click to skip</span></div>
+      <div class="gate"><img src="${logoSrc}" alt=""><button type="button" class="go">▶ TAP TO ENTER</button>
+        <span class="hint">best with sound on 🔊</span><button type="button" class="skipg">skip intro</button></div>`;
+    el.classList.add("gated");
     (document.body || document.documentElement).appendChild(el);
 
     // ---------------- sound (original, synthesized) ----------------
@@ -116,7 +129,7 @@
     const V = [[0, 1.3, 0], [0, -1.3, 0], [1, 0, 0], [-1, 0, 0], [0, 0, 1], [0, 0, -1]];
     const F = [[0, 2, 4], [0, 4, 3], [0, 3, 5], [0, 5, 2], [1, 4, 2], [1, 3, 4], [1, 5, 3], [1, 2, 5]];
     const E = [[0, 2], [0, 3], [0, 4], [0, 5], [1, 2], [1, 3], [1, 4], [1, 5], [2, 4], [4, 3], [3, 5], [5, 2]];
-    const t0 = performance.now();
+    let t0 = performance.now();
     let done = false, phase = 0;
     const badge = el.querySelector(".badge"), word = el.querySelector(".word"), tag = el.querySelector(".tag");
     const ease = x => 1 - Math.pow(1 - Math.min(1, Math.max(0, x)), 3);
@@ -207,12 +220,30 @@
       setTimeout(() => el.remove(), 900);
     }
 
-    requestAnimationFrame(frame);
-    playSound();
-    el.addEventListener("click", () => finish(true));
-    addEventListener("keydown", () => finish(true), { once: true });
+    // The "tap to enter" screen: the tap is the browser's permission to play sound, then the show starts.
+    let started = false;
+    const gate = el.querySelector(".gate");
+    function start() {
+      if (started || done) return;
+      started = true;
+      t0 = performance.now();
+      playSound();                         // inside the tap, so the browser allows audio
+      gate.style.opacity = "0";
+      setTimeout(() => gate.remove(), 350);
+      el.classList.remove("gated");
+      requestAnimationFrame(frame);
+      setTimeout(() => el.addEventListener("click", () => finish(true)), 300);  // later clicks skip
+      setTimeout(() => finish(false), 3600);
+    }
+    gate.querySelector(".go").addEventListener("click", e => { e.stopPropagation(); start(); });
+    gate.querySelector(".skipg").addEventListener("click", e => { e.stopPropagation(); finish(true); });
+    gate.addEventListener("click", e => { e.stopPropagation(); start(); });
+    addEventListener("keydown", e => {
+      if (e.key === "Escape") finish(true);
+      else if (!started && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); start(); }
+      else if (started) finish(true);
+    });
     addEventListener("resize", size);
-    setTimeout(() => finish(false), 3600);
   } catch (e) {
     document.getElementById("kintro")?.remove();  // never block the app
   }
