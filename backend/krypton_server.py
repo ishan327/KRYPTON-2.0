@@ -745,8 +745,15 @@ def parent_delete_user(uid: str, x_parent_token: str | None = Header(None)):
 # ---------------- school administration ----------------
 # Staff use their own admin password (X-School-Token); students/parents read their feed under /api.
 class SchoolSetupReq(BaseModel):
-    school_name: str
-    admin_name: str = ""
+    school_name: str = ""
+    username: str
+    name: str = ""
+    cls: str
+    password: str
+
+
+class SchoolLoginReq(BaseModel):
+    username: str
     password: str
 
 
@@ -767,8 +774,8 @@ class SchoolReportReq(BaseModel):
     date: str = ""
 
 
-def _staff(token):
-    _guard(school.require, token)
+def _staff(token) -> dict:
+    return _guard(school.require, token)
 
 
 @app.get("/school-api/status")
@@ -777,48 +784,43 @@ def school_status():
 
 
 @app.post("/school-api/setup")
-def school_setup(r: SchoolSetupReq, request: Request):
-    host = request.headers.get("host", "").split(":")[0]
-    if "cf-connecting-ip" in request.headers or host not in ("127.0.0.1", "localhost"):
-        raise HTTPException(403, "The school admin can only be set up on the Krypton laptop.")
-    token = _guard(school.setup, r.school_name, r.admin_name, r.password)
-    log_event("settings", None, f"🏫 school admin created: {r.school_name}")
+def school_setup(r: SchoolSetupReq):
+    # Hackathon mode: the school admin can be created from any device (first one wins; later it's login only)
+    token = _guard(school.setup, r.school_name, r.username, r.name, r.cls, r.password)
+    log_event("settings", None, f"🏫 class admin @{r.username} created for Class {r.cls}")
     return {"token": token}
 
 
 @app.post("/school-api/login")
-def school_login(r: PasswordReq):
-    return {"token": _guard(school.login, r.password)}
+def school_login(r: SchoolLoginReq):
+    return {"token": _guard(school.login, r.username, r.password)}
 
 
 @app.get("/school-api/overview")
 def school_overview(x_school_token: str | None = Header(None)):
-    _staff(x_school_token)
-    return school.admin_overview()
+    return school.admin_overview(_staff(x_school_token))
 
 
 @app.post("/school-api/events")
 def school_event(r: SchoolEventReq, x_school_token: str | None = Header(None)):
-    _staff(x_school_token)
-    e = _guard(school.add_event, r.model_dump())
+    e = _guard(school.add_event, r.model_dump(), _staff(x_school_token))
     log_event("settings", None, f"🏫 event posted: {e['title']} on {e['date']}")
     return e
 
 
 @app.post("/school-api/reports")
 def school_report(r: SchoolReportReq, x_school_token: str | None = Header(None)):
-    _staff(x_school_token)
-    rep = _guard(school.add_report, r.model_dump())
+    rep = _guard(school.add_report, r.model_dump(), _staff(x_school_token))
     log_event("settings", None, f"🏫 behaviour report ({rep['category']}) for {rep['student_name']}")
     return rep
 
 
 @app.delete("/school-api/{kind}/{item_id}")
 def school_delete(kind: str, item_id: str, x_school_token: str | None = Header(None)):
-    _staff(x_school_token)
+    admin = _staff(x_school_token)
     if kind not in ("events", "reports"):
         raise HTTPException(400, "unknown item")
-    school.delete(kind, item_id)
+    school.delete(kind, item_id, admin)
     return {"ok": True}
 
 

@@ -34,12 +34,15 @@
   <section class="gate" id="setup" hidden>
     <form class="card" id="setupForm">
       <div class="brand"><div class="gem"></div>KRYPTON · SCHOOL</div>
-      <h1>Set up the school admin</h1>
-      <p class="muted">Staff use this login to send event reminders and behaviour reports to parents. Can only be set up on the Krypton laptop.</p>
-      <div class="field"><label>School name</label><input id="sName" required></div>
-      <div class="field"><label>Your name / role</label><input id="sAdmin" placeholder="e.g. Mrs Sharma, Class Teacher"></div>
-      <div class="field"><label>Admin password</label><input type="password" id="sPw" required minlength="6" autocomplete="new-password"></div>
-      <button class="btn-primary">Create school admin</button>
+      <h1>Create a class admin</h1>
+      <p class="muted" id="slotInfo">Each class teacher gets their own login and manages their class.</p>
+      <div class="field" id="fSchool"><label>School name</label><input id="sName"></div>
+      <div class="field"><label>Your name</label><input id="sAdmin" placeholder="e.g. Mrs Sharma" required></div>
+      <div class="field"><label>Your class</label><select id="sCls"></select></div>
+      <div class="field"><label>Username</label><input id="sUser" required autocapitalize="off" autocomplete="username"></div>
+      <div class="field"><label>Password</label><input type="password" id="sPw" required minlength="6" autocomplete="new-password"></div>
+      <button class="btn-primary">Create my admin account</button>
+      <button type="button" class="btn-ghost" id="toLogin" style="width:100%;margin-top:8px">I already have an account → log in</button>
       <div class="msg" id="setupMsg"></div>
     </form>
   </section>
@@ -49,8 +52,10 @@
       <div class="brand"><div class="gem"></div>KRYPTON · SCHOOL</div>
       <h1 id="loginTitle">School admin login</h1>
       <p class="muted">Post events and reminders, and report on students' behaviour to their parents.</p>
-      <div class="field"><label>Admin password</label><input type="password" id="lPw" required autocomplete="current-password"></div>
+      <div class="field"><label>Username</label><input id="lUser" required autocapitalize="off" autocomplete="username"></div>
+      <div class="field"><label>Password</label><input type="password" id="lPw" required autocomplete="current-password"></div>
       <button class="btn-primary">Log in</button>
+      <button type="button" class="btn-ghost" id="toSetup" style="width:100%;margin-top:8px">New class teacher? Create an account</button>
       <div class="msg" id="loginMsg"></div>
     </form>
   </section>
@@ -75,9 +80,7 @@
             <div class="field"><label>Time</label><input type="time" id="evTime"></div>
             <div class="field"><label>Remind parents</label><select id="evRemind"><option value="1">1 day before</option><option value="2" selected>2 days before</option><option value="3">3 days before</option><option value="7">1 week before</option></select></div>
           </div>
-          <div class="field"><label>For</label><select id="evAud"><option value="all">Everyone</option>
-            <option value="1">Class 1</option><option value="2">Class 2</option><option value="3">Class 3</option><option value="4">Class 4</option><option value="5">Class 5</option>
-            <option value="6">Class 6</option><option value="7">Class 7</option><option value="8">Class 8</option><option value="9">Class 9</option><option value="10">Class 10</option></select></div>
+          <div class="field"><label>For</label><select id="evAud"></select></div>
           <div class="field"><label>Details for parents</label><textarea id="evDesc" rows="3" placeholder="What to bring, where, dress code…"></textarea></div>
           <button class="btn-primary">Post event</button><div class="msg" id="evMsg"></div></form>
         <div class="card"><h3>Upcoming events</h3><div id="evList"></div></div>

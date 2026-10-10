@@ -1,0 +1,60 @@
+/* Krypton responsive layout: phones get a top bar + slide-out menu + bottom tabs; laptops get a roomier layout. */
+.mtop, .mnav, .mshade { display: none; }
+
+/* ---------- laptops & big screens ---------- */
+@media (min-width: 1100px) {
+  .layout { grid-template-columns: 264px 1fr; }
+  main { padding: 26px 44px 70px; max-width: 1240px; }
+}
+
+/* ---------- tablets ---------- */
+@media (min-width: 761px) and (max-width: 1099px) {
+  .layout { grid-template-columns: 210px 1fr; }
+  .side { padding: 18px 10px; }
+  nav button { padding: 9px 10px; font-size: 13px; }
+  main { padding: 18px 22px 60px; }
+  .grid2 { grid-template-columns: 1fr; }
+}
+
+/* ---------- phones ---------- */
+@media (max-width: 760px) {
+  body { font-size: 15px; }
+  .layout { display: block; }
+  .mtop { display: flex; position: sticky; top: 0; z-index: 40; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 10px 14px; background: var(--panel); border-bottom: 1px solid var(--line); }
+  .mtop .brand { font-size: 16px; }
+  .mtop button { background: transparent; font-size: 22px; padding: 4px 8px; }
+  .side { position: fixed; z-index: 60; top: 0; left: 0; height: 100vh; width: min(300px, 84vw); overflow-y: auto;
+    transform: translateX(-105%); transition: transform .25s ease; background: var(--panel); box-shadow: 10px 0 40px rgba(0,0,0,.4); }
+  .side.open { transform: none; }
+  .mshade { position: fixed; inset: 0; z-index: 55; background: rgba(0,0,0,.45); }
+  .mshade.on { display: block; }
+  main { padding: 12px 14px 92px; max-width: none; }
+  .hero { margin: 14px 0 12px; }
+  .hero h1 { font-size: 26px; }
+  .ctx { position: static; flex-wrap: wrap; gap: 10px; padding: 12px; }
+  .ctx .field { min-width: calc(50% - 6px); flex: 1; }
+  .ctx .field.grow { min-width: 100%; }
+  .ask { flex-wrap: wrap; }
+  .ask input { min-width: 100%; }
+  .ask button, .ask select.small { flex: 1; }
+  .grid2, .lists, .kpis, .stats { grid-template-columns: 1fr !important; }
+  .row { gap: 8px; }
+  button { min-height: 42px; }
+  .bubble { max-width: 92%; }
+  .chat { height: calc(100vh - 230px); }
+  .paper { padding: 18px 14px; font-size: 14px; }
+  .paper .popts { grid-template-columns: 1fr; }
+  .bar { grid-template-columns: 96px 1fr 46px; }
+  .lb { grid-template-columns: 28px 1fr 60px 0 60px; font-size: 13px; }
+  .lb > :nth-child(4) { display: none; }
+  .labtabs { width: 100%; overflow-x: auto; }
+  .letters { grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); }
+  .deckrow { flex-wrap: wrap; gap: 8px; }
+  table { display: block; overflow-x: auto; white-space: nowrap; }
+  .mnav { display: grid; grid-template-columns: repeat(5, 1fr); position: fixed; bottom: 0; left: 0; right: 0; z-index: 40;
+    background: var(--panel); border-top: 1px solid var(--line); padding: 6px 4px calc(6px + env(safe-area-inset-bottom)); }
+  .mnav button { background: transparent; color: var(--muted); display: grid; gap: 2px; justify-items: center; font-size: 11px; padding: 4px 2px; min-height: 0; }
+  .mnav button span { font-size: 20px; }
+  .mnav button.active { color: var(--accent); }
+}

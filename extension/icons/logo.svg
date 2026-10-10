@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0b1f16"/><stop offset="1" stop-color="#03100a"/></linearGradient>
+    <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b6ff3b"/><stop offset=".5" stop-color="#2ff58a"/><stop offset="1" stop-color="#18c9c2"/></linearGradient>
+    <linearGradient id="f1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e9ffb8"/><stop offset="1" stop-color="#7dff5a"/></linearGradient>
+    <linearGradient id="f2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5cff6a"/><stop offset="1" stop-color="#1fbf6a"/></linearGradient>
+    <linearGradient id="f3" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2ff5c8"/><stop offset="1" stop-color="#0e8f86"/></linearGradient>
+    <linearGradient id="f4" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#18c9c2"/><stop offset="1" stop-color="#06564f"/></linearGradient>
+    <radialGradient id="glow" cx=".5" cy=".45" r=".5"><stop offset="0" stop-color="#5cff6a" stop-opacity=".45"/><stop offset="1" stop-color="#5cff6a" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect x="3" y="3" width="122" height="122" rx="30" fill="url(#bg)"/>
+  <rect x="3" y="3" width="122" height="122" rx="30" fill="none" stroke="url(#rim)" stroke-width="3" opacity=".9"/>
+  <circle cx="64" cy="60" r="46" fill="url(#glow)"/>
+  <!-- crown -->
+  <polygon points="40,46 52,30 76,30 88,46" fill="url(#f1)"/>
+  <polygon points="52,30 64,46 40,46" fill="#c9ff8a" opacity=".85"/>
+  <polygon points="76,30 88,46 64,46" fill="#8dffb0" opacity=".85"/>
+  <!-- pavilion -->
+  <polygon points="40,46 64,46 64,100" fill="url(#f2)"/>
+  <polygon points="64,46 88,46 64,100" fill="url(#f3)"/>
+  <polygon points="52,46 64,46 64,100" fill="#ffffff" opacity=".12"/>
+  <polygon points="64,46 76,46 64,100" fill="url(#f4)" opacity=".55"/>
+  <polyline points="40,46 52,30 76,30 88,46 64,100 40,46 88,46" fill="none" stroke="#ffffff" stroke-opacity=".55" stroke-width="1.6" stroke-linejoin="round"/>
+  <!-- sparkle -->
+  <path d="M95 26 l2.2 6.3 6.3 2.2 -6.3 2.2 -2.2 6.3 -2.2-6.3 -6.3-2.2 6.3-2.2z" fill="#ffffff" opacity=".9"/>
+</svg>

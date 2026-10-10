@@ -1,5 +1,12 @@
 const $ = id => document.getElementById(id);
-let STOKEN = null, DATA = null;
+let STOKEN = null, DATA = null, STATUS = null;
+function prepSetup(st) {
+  $("fSchool").hidden = !!st.school_name;
+  const free = Array.from({ length: 10 }, (_, i) => String(i + 1)).filter(c => !st.taken_classes.includes(c));
+  $("sCls").innerHTML = free.map(c => `<option value="${c}">Class ${c}</option>`).join("");
+  const left = st.max_admins - st.admins;
+  $("slotInfo").textContent = left > 0 ? `${left} of ${st.max_admins} class-admin accounts left. Each teacher manages their own class.` : "All class-admin accounts are taken — log in instead.";
+}
 try { STOKEN = sessionStorage.getItem("krypton.school"); } catch (e) { /* storage blocked */ }
 const sapi = (path, body, method) => api(path, body, { method, headers: STOKEN ? { "X-School-Token": STOKEN } : {} });
 const say = (id, text, ok) => { $(id).textContent = text; $(id).className = "msg " + (ok ? "good" : "bad"); };
@@ -12,8 +19,10 @@ async function start() {
     document.body.innerHTML = `<div class="gate"><div class="card err">School features aren't switched on yet — restart Krypton (desktop shortcut "Krypton - Restart"), then reload this page.</div></div>`;
     return;
   }
+  STATUS = st;
+  prepSetup(st);
   if (!st.setup) return show("setup");
-  $("loginTitle").textContent = `${st.school_name} · admin`;
+  $("loginTitle").textContent = `${st.school_name} · class admin login`;
   if (STOKEN) { try { await load(); return; } catch (e) { setToken(null); } }
   show("login");
 }
@@ -21,16 +30,18 @@ async function start() {
 $("setupForm").onsubmit = async e => {
   e.preventDefault();
   try {
-    setToken((await api("/school-api/setup", { school_name: $("sName").value, admin_name: $("sAdmin").value, password: $("sPw").value })).token);
+    setToken((await api("/school-api/setup", { school_name: $("sName").value, name: $("sAdmin").value, cls: $("sCls").value, username: $("sUser").value, password: $("sPw").value })).token);
     await load();
   } catch (err) { say("setupMsg", err.message); }
 };
 $("loginForm").onsubmit = async e => {
   e.preventDefault();
-  try { setToken((await api("/school-api/login", { password: $("lPw").value })).token); await load(); }
+  try { setToken((await api("/school-api/login", { username: $("lUser").value, password: $("lPw").value })).token); await load(); }
   catch (err) { say("loginMsg", err.message); }
 };
 $("logout").onclick = () => { setToken(null); show("login"); };
+$("toLogin").onclick = () => show("login");
+$("toSetup").onclick = () => show("setup");
 document.querySelectorAll("#stabs button").forEach(b => b.onclick = () => {
   document.querySelectorAll("#stabs button").forEach(x => x.classList.toggle("active", x === b));
   document.querySelectorAll(".sp").forEach(p => p.classList.toggle("active", p.id === "s-" + b.dataset.s));
@@ -39,7 +50,8 @@ document.querySelectorAll("#stabs button").forEach(b => b.onclick = () => {
 async function load() {
   DATA = await sapi("/school-api/overview");
   show("board");
-  $("schoolName").textContent = DATA.school_name.toUpperCase();
+  $("schoolName").textContent = `${DATA.school_name.toUpperCase()} · CLASS ${DATA.me.cls}`;
+  $("evAud").innerHTML = `<option value="${esc(DATA.me.cls)}">My class (Class ${esc(DATA.me.cls)})</option><option value="all">Whole school</option>`;
   const today = new Date().toLocaleDateString("en-CA");
   if (!$("evDate").value) $("evDate").value = today;
   if (!$("rpDate").value) $("rpDate").value = today;
